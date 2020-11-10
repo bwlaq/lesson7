@@ -1,70 +1,65 @@
-# Getting Started with Create React App
+## Deploy to AWS S3
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Setup your AWS Account
 
-## Available Scripts
+Create an account, https://portal.aws.amazon.com/billing/signup.
 
-In the project directory, you can run:
+Log in to the AWS console, https://signin.aws.amazon.com/signin
 
-### `npm start`
+Click Services at the top left and search for IAM.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+On the IAM console, we need to create a user with AdministratorAccess
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+Copy Access Key ID and Secret key
 
-### `npm test`
+## Create a S3 Bucket
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+choose s3 bucket service
 
-### `npm run build`
+In proproties tab, choose host static website
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+type `index.html` in index and error document input
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+After save properties, you will see the Bucket website endpoint at the bottom of page
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+`http://your-bucket-name.s3-website-us-east-1.amazonaws.com`
 
-### `npm run eject`
+in permissions tab,
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+tick off Block all public access
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+and change the policy to the following
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+`{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowPublicReadAccess",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::your-bucket-name/*"
+        }
+    ]
+}`
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
-## Learn More
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Intall AWS CLI
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+`brew install awscli` on macos
+`aws configure` 
+AWS Access Key ID [None]: XXXX
+AWS Secret Access Key [None]: XXXX
+Default region name [None]: us-west-1
+Default output format [None]: ENTER
 
-### Code Splitting
+## Create a react app or reuse
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+`npx create-react-app my-app`
 
-### Analyzing the Bundle Size
+add the script to package.json
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+`"deploy": "npm run build & aws s3 sync build/ s3://your-bucket-name"`
 
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+`npm run deploy`
